@@ -1,6 +1,7 @@
 // src/components/Header.tsx
 import { Link } from 'react-router-dom';
 import { Button } from './ui/button'; // Assuming you have a Button component
+import { ModeToggle } from './ModeToggle';
 
 // Import icons from Heroicons
 
@@ -38,6 +39,7 @@ const Header = () => {
             </li>
               <li>
               </li>
+              <ModeToggle />
                 <li>
                   <Link to="/login">
                     <Button variant="default" className="ml-4 flex items-center space-x-2">

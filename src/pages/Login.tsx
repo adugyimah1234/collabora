@@ -5,12 +5,14 @@ import axios from 'axios';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { motion } from 'framer-motion';
+import Modal from '../components/Modal'; // Import the Modal component
 
 const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false); // State to control modal visibility
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,13 +32,17 @@ const Login = () => {
 
       // Handle successful login
       const { token, user } = response.data;
-      localStorage.setItem('token', token); // Save token to localStorage or handle it as needed
-      // Optionally store user info if needed
-      localStorage.setItem('user', JSON.stringify(user)); 
-      navigate('/dashboard');
+      localStorage.setItem('token', token); // Save token to localStorage
+      localStorage.setItem('user', JSON.stringify(user)); // Optionally store user info
+      setIsModalOpen(true); // Open modal on successful login
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to log in. Please try again.');
     }
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    navigate('/dashboard'); // Navigate to dashboard after closing the modal
   };
 
   return (
@@ -77,6 +83,13 @@ const Login = () => {
           </Button>
         </form>
       </motion.div>
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        title="Login Successful"
+        message="You have successfully logged in!"
+      />
     </div>
   );
 };

@@ -3,7 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { motion } from 'framer-motion';
+import Modal from '../components/Modal';
 
 const Signup: React.FC = () => {
   const navigate = useNavigate();
@@ -11,19 +19,18 @@ const Signup: React.FC = () => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
-  const [role, setRole] = useState<string>('student'); // Optional
-  const [learningStyle, setLearningStyle] = useState<string>(''); // Optional
-  const [availability, setAvailability] = useState<string>(''); // Optional
-  const [courses, setCourses] = useState<number[]>([]); // Optional
+  const [role, setRole] = useState<string>('student');
+  const [learningStyle, setLearningStyle] = useState<string>('visual');
+  const [availability, setAvailability] = useState<string>('full-time');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
-    // Simple validation check
     if (password !== confirmPassword) {
       setError('Passwords do not match.');
       setLoading(false);
@@ -33,15 +40,20 @@ const Signup: React.FC = () => {
     try {
       await axios.post(
         'http://localhost:5000/api/users/register',
-        { name, email, password, role, learning_style: learningStyle, availability, courses },
+        { name, email, password, role, learning_style: learningStyle, availability },
         { headers: { 'Content-Type': 'application/json' } }
       );
-      navigate('/dashboard');
+      setIsModalOpen(true);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Signup failed. Please try again.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    navigate('/login');
   };
 
   return (
@@ -94,6 +106,32 @@ const Signup: React.FC = () => {
               required
             />
           </div>
+          <div className="mb-4">
+            <label className="block text-muted-foreground mb-1" htmlFor="learningStyle">Learning Style</label>
+            <Select onValueChange={(value) => setLearningStyle(value)}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select your learning style" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="visual">Visual</SelectItem>
+                <SelectItem value="auditory">Auditory</SelectItem>
+                <SelectItem value="kinesthetic">Kinesthetic</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="mb-4">
+            <label className="block text-muted-foreground mb-1" htmlFor="availability">Availability</label>
+            <Select onValueChange={(value) => setAvailability(value)}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select your availability" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="full-time">Full-Time</SelectItem>
+                <SelectItem value="part-time">Part-Time</SelectItem>
+                <SelectItem value="flexible">Flexible</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
           <Button
             type="submit"
@@ -105,6 +143,13 @@ const Signup: React.FC = () => {
           </Button>
         </form>
       </motion.div>
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        title="Account Created"
+        message="Your account has been successfully created!"
+      />
     </div>
   );
 };
