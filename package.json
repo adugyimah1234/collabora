@@ -34,7 +34,9 @@
     "date-fns": "^3.6.0",
     "dotenv": "^16.4.5",
     "embla-carousel-react": "^8.1.7",
+    "emoji-picker-react": "^4.11.1",
     "express": "^4.19.2",
+    "file-saver": "^2.0.5",
     "firebase": "^10.12.4",
     "framer-motion": "^11.3.24",
     "lucide-react": "^0.244.0",
@@ -55,6 +57,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/file-saver": "^2.0.7",
     "@types/node": "^20.8.0",
     "@types/react": "^18.0.37",
     "@types/react-dom": "^18.0.11",
