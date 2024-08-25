@@ -1,76 +1,108 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import useSocket from '../hooks/useSocket';
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
+import useEventModal from '../hooks/useEventModal';
+import CreateEventModal from './CreateEventModal';
+import MessageList from './MessageList';
+
+// Schema for message validation
+const messageSchema = z.object({
+  message: z.string().min(1, 'Message cannot be empty'),
+});
+
+type MessageType = {
+  content: string;
+  sender: string;
+  timestamp: Date;
+};
 
 const GroupChat: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const socket = useSocket('/groupchat');
+  const { toast } = useToast();
+  const { connected, on, off, emit } = useSocket(process.env.REACT_APP_API_URL || 'http://localhost:8000');
+  const [messages, setMessages] = useState<MessageType[]>([]);
   const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState<{ content: string }[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const { showModal, setShowModal, eventDate, setEventDate, handleEventCreation } = useEventModal();
+  const form = useForm<z.infer<typeof messageSchema>>({ resolver: zodResolver(messageSchema) });
 
   useEffect(() => {
-    if (socket) {
-      // Emit joinGroup event when socket is ready and ID is available
-      socket.emit('joinGroup', id);
-
-      // Listen for receiveMessage event
-      socket.on('receiveMessage', (msg: { groupId: string; content: string }) => {
-        if (msg.groupId === id) {
-          setMessages((prevMessages) => [...prevMessages, msg]);
-        }
+    if (connected) {
+      on('newMessage', (msg: MessageType) => {
+        setMessages((prevMessages) => [...prevMessages, msg]);
       });
 
-      // Cleanup function to remove the listener when component unmounts
       return () => {
-        socket.off('receiveMessage');
+        off('newMessage');
       };
     }
-  }, [socket, id]);
+  }, [connected, on, off]);
 
-  const sendMessage = () => {
-    if (message.trim() && socket) {
-      socket.emit('sendMessage', { groupId: id, content: message });
-      setMessage('');
+  const sendMessage = async (data: z.infer<typeof messageSchema>) => {
+    try {
+      if (!id) return;
+
+      const studyGroupId = parseInt(id, 10);
+
+      if (connected) {
+        emit('sendMessage', { groupId: studyGroupId, content: data.message });
+        setMessages((prevMessages) => [...prevMessages, { content: data.message, sender: 'You', timestamp: new Date() }]);
+        setMessage('');
+        form.reset(); // Reset form after sending message
+        toast({ description: 'Your message has been sent.' });
+      } else {
+        console.error('Cannot send message. Socket is not connected.');
+      }
+    } catch (error) {
+      console.error('Error sending message:', error instanceof Error ? error.message : error);
     }
   };
 
   return (
-    <motion.div
-      className="max-w-3xl mx-auto mt-10 p-6 bg-background rounded-lg shadow-md"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      <h2 className="text-2xl font-bold mb-4">Group Chat</h2>
-      <div className="h-64 overflow-y-auto mb-4 p-4 border rounded-lg bg-background">
-        {messages.map((msg, index) => (
-          <motion.div
-            key={index}
-            className="p-2 mb-2 bg-muted-foreground rounded"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-          >
-            {msg.content}
-          </motion.div>
-        ))}
-      </div>
-      <div className="flex">
-        <input
-          type="text"
-          className="flex-grow px-3 py-2 text-muted-foreground border rounded-lg mr-2"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-        />
-        <button
-          className="px-3 py-2 bg-blue-500 text-white rounded-lg"
-          onClick={sendMessage}
+    <div className="flex flex-col h-full">
+      <MessageList messages={messages.filter((msg) => msg.content.toLowerCase().includes(searchTerm.toLowerCase()))} />
+
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(sendMessage)}
+          className="flex items-center p-4 bg-background"
         >
-          Send
-        </button>
-      </div>
-    </motion.div>
+          <FormField
+            control={form.control}
+            name="message"
+            render={({ field }) => (
+              <FormItem className="flex-grow">
+                <FormControl>
+                  <Input
+                    placeholder="Type a message..."
+                    {...field}
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="submit" className="ml-2">Send</Button>
+        </form>
+      </Form>
+
+      <CreateEventModal
+        showModal={showModal}
+        setShowModal={setShowModal}
+        eventDate={eventDate}
+        setEventDate={setEventDate}
+        handleEventCreation={handleEventCreation}
+      />
+    </div>
   );
 };
 

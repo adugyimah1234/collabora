@@ -1,9 +1,7 @@
-import { useAuth } from '../context/AuthContext';
-
 export const useAuthHeaders = () => {
-  const { token } = useAuth();
+  const token = import.meta.env.VITE_APP_API_TOKEN;
   return {
     Authorization: `Bearer ${token}`,
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
   };
 };

@@ -1,21 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { fetchStudyGroups } from '../api/studyGroups';
-import { useAuthHeaders } from '../hooks/useAuthHeaders';
 
 interface StudyGroup {
-  id: string;
+  study_group_id: number; // Update field name to match API response
   name: string;
+  description: string;
+  course_id: number | null;
+  current_activity: string | null;
+  created_at: string;
 }
 
 const StudyGroupsList: React.FC = () => {
   const [studyGroups, setStudyGroups] = useState<StudyGroup[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const headers = useAuthHeaders();
 
   useEffect(() => {
     const getStudyGroups = async () => {
       try {
-        const data = await fetchStudyGroups(headers);
+        const data = await fetchStudyGroups();
         setStudyGroups(data);
       } catch (err) {
         if (err instanceof Error) {
@@ -27,21 +29,21 @@ const StudyGroupsList: React.FC = () => {
     };
 
     getStudyGroups();
-  }, [headers]);
+  }, []);
 
   if (error) {
     return <div>Error: {error}</div>;
   }
 
   return (
-    <div>
-      <h1>Study Groups</h1>
-      <ul>
-        {studyGroups.map((group) => (
-          <li key={group.id}>{group.name}</li>
-        ))}
-      </ul>
-    </div>
+    <ul>
+      {studyGroups.map((group) => (
+        <li key={group.study_group_id}> {/* Updated key to use study_group_id */}
+          <h3>{group.name}</h3>
+          <p>{group.description}</p>
+        </li>
+      ))}
+    </ul>
   );
 };
 

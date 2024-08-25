@@ -27,7 +27,7 @@ const sidebarItems = [
   { name: "Home", path: "/dashboard", icon: <FaHome /> },
   { name: "Courses", path: "/courses", icon: <FaBook /> },
   { name: "Assignments", path: "/assignments", icon: <FaTasks /> },
-  { name: "Study Groups", path: "/groups", icon: <FaUsers /> },
+  { name: "Study Groups", path: "/group", icon: <FaUsers /> },
   { name: "Profile", path: "/profile", icon: <FaUser /> },
   { name: "Calendar", path: "/calendar", icon: <FaCalendarAlt /> },
   { name: "Analytics", path: "/analytics", icon: <FaChartBar /> },
