@@ -19,9 +19,11 @@ import ProfilePage from './pages/ProfilePage';
 import CreateGroupForm from './components/CreateGroupForm';
 import JoinLeaveStudyGroup from './components/JoinLeaveStudyGroup';
 import StudyGroupsPage from './pages/StudyGroupPage';
+import { ThemeProvider } from "@/components/ThemeProvider"
 
 function App() {
-  return (
+  return (    
+  <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
     <AuthProvider>
       <Router>
         <Routes>
@@ -49,6 +51,7 @@ function App() {
         </Routes>      
       </Router>
     </AuthProvider>
+     </ThemeProvider>
   );
 }
 

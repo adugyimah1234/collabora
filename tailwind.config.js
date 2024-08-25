@@ -5,7 +5,7 @@ module.exports = {
     './pages/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
     './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
+    "./src/**/*.{js,ts,jsx,tsx}", // Adjust paths as necessary
   ],
   prefix: "",
   theme: {
@@ -106,6 +106,9 @@ module.exports = {
     },
   },
   plugins: [
+    require("tailwindcss-animate"),
+    require('@tailwindcss/forms'),
+    require('@tailwindcss/typography'),
     require("tailwindcss-animate"),
     // You can add more plugins here
   ],
