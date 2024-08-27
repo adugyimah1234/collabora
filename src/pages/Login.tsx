@@ -28,12 +28,9 @@ const Login = () => {
         },
       });
 
-      console.log(response);
-
-      // Handle successful login
       const { token, user } = response.data;
       localStorage.setItem('token', token); // Save token to localStorage
-      localStorage.setItem('user', JSON.stringify(user)); // Optionally store user info
+      localStorage.setItem('user', JSON.stringify(user)); // Save user info to localStorage
       setIsModalOpen(true); // Open modal on successful login
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to log in. Please try again.');

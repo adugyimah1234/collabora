@@ -1,50 +1,34 @@
 import React, { useEffect, useState } from 'react';
-import { fetchStudyGroups } from '../api/studyGroups';
+import { getAllStudyGroups } from '../api/studyGroups';
 
-interface StudyGroup {
-  study_group_id: number; // Update field name to match API response
-  name: string;
-  description: string;
-  course_id: number | null;
-  current_activity: string | null;
-  created_at: string;
-}
-
-const StudyGroupsList: React.FC = () => {
-  const [studyGroups, setStudyGroups] = useState<StudyGroup[]>([]);
-  const [error, setError] = useState<string | null>(null);
+const StudyGroupList: React.FC = () => {
+  const [studyGroups, setStudyGroups] = useState<any[]>([]);
 
   useEffect(() => {
-    const getStudyGroups = async () => {
+    const fetchStudyGroups = async () => {
       try {
-        const data = await fetchStudyGroups();
-        setStudyGroups(data);
-      } catch (err) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError('An unknown error occurred');
-        }
+        const response = await getAllStudyGroups();
+        setStudyGroups(response.data);
+      } catch (error) {
+        console.error('Error fetching study groups', error);
       }
     };
 
-    getStudyGroups();
+    fetchStudyGroups();
   }, []);
 
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-
   return (
-    <ul>
-      {studyGroups.map((group) => (
-        <li key={group.study_group_id}> {/* Updated key to use study_group_id */}
-          <h3>{group.name}</h3>
-          <p>{group.description}</p>
-        </li>
-      ))}
-    </ul>
+    <div>
+      <h1>Study Groups</h1>
+      <ul>
+        {studyGroups.map((group) => (
+          <li key={group.id}>
+            <a href={`/study-groups/${group.id}`}>{group.name}</a>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 };
 
-export default StudyGroupsList;
+export default StudyGroupList;

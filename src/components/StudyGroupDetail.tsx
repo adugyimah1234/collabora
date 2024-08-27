@@ -1,57 +1,51 @@
-import { useEffect, useState } from 'react'; // Removed unused import of React
-import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { getStudyGroupById, joinStudyGroup, leaveStudyGroup } from '../api/studyGroups';
 
-// Define the types for the group object and schedule events
-interface ScheduleEvent {
-  date: string;
-  topic: string;
-}
-
-interface StudyGroup {
-  name: string;
-  description: string;
-  schedule: ScheduleEvent[];
-}
-
-const StudyGroupDetail = () => {
-  const { id } = useParams<{ id: string }>(); // Add type annotation for useParams
-  const [group, setGroup] = useState<StudyGroup | null>(null); // Define state type
+const StudyGroupDetail: React.FC<{ userId: number }> = ({ userId }) => {
+  const { id } = useParams<{ id: string }>();
+  const [studyGroup, setStudyGroup] = useState<any>(null);
 
   useEffect(() => {
-    const fetchGroup = async () => {
+    const fetchStudyGroup = async () => {
       try {
-        const response = await axios.get(`/api/groups/${id}`);
-        setGroup(response.data);
+        const response = await getStudyGroupById(Number(id));
+        setStudyGroup(response.data);
       } catch (error) {
-        console.error('Error fetching study group details', error);
+        console.error('Error fetching study group', error);
       }
     };
 
-    fetchGroup();
+    fetchStudyGroup();
   }, [id]);
 
-  if (!group) return <div>Loading...</div>;
+  const handleJoin = async () => {
+    try {
+      await joinStudyGroup(Number(id), userId);
+      alert('Joined study group successfully');
+    } catch (error) {
+      console.error('Error joining study group', error);
+    }
+  };
+
+  const handleLeave = async () => {
+    try {
+      await leaveStudyGroup(Number(id), userId);
+      alert('Left study group successfully');
+    } catch (error) {
+      console.error('Error leaving study group', error);
+    }
+  };
+
+  if (!studyGroup) return <p>Loading...</p>;
 
   return (
-    <motion.div
-      className="max-w-3xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      <h2 className="text-2xl font-bold mb-4">{group.name}</h2>
-      <p className="text-gray-700 mb-4">{group.description}</p>
-      <h3 className="text-xl font-bold mb-2">Schedule</h3>
-      <ul className="list-disc list-inside">
-        {group.schedule.map((event: ScheduleEvent, index: number) => (
-          <li key={index}>
-            {event.date}: {event.topic}
-          </li>
-        ))}
-      </ul>
-    </motion.div>
+    <div>
+      <h1>{studyGroup.name}</h1>
+      <p>{studyGroup.description}</p>
+      <button onClick={handleJoin}>Join Study Group</button>
+      <button onClick={handleLeave}>Leave Study Group</button>
+    </div>
   );
 };
 

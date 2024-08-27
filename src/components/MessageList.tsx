@@ -5,6 +5,8 @@ interface Message {
   content: string;
   sender: string;
   timestamp: Date;
+  type?: string;
+  fileName?: string;
 }
 
 interface MessageListProps {
@@ -29,7 +31,15 @@ const MessageList: React.FC<MessageListProps> = ({ messages }) => (
         <div
           className={`max-w-xs px-4 py-2 rounded-lg shadow-md ${msg.sender === 'You' ? "bg-primary text-white" : "bg-muted-foreground"}`}
         >
-          {msg.content}
+          {msg.type === 'text' && msg.content}
+          {msg.type === 'file' && (
+            <a href={msg.content} download={msg.fileName} className="underline">
+              {msg.fileName}
+            </a>
+          )}
+          {msg.type === 'audio' && (
+            <audio controls src={msg.content}></audio>
+          )}
         </div>
       </motion.div>
     ))}

@@ -1,40 +1,35 @@
-import apiClient from './apiClient';
+import axios from 'axios';
 
-// Fetch all study groups
-export const fetchStudyGroups = async () => {
-  try {
-    const response = await apiClient.get('/study-groups');
-    console.log(JSON.stringify(response.data)); // Log the response data
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching study groups:', error);
-    throw new Error('Failed to fetch study groups');
-  }
-};
-// Join a study group
-export const joinStudyGroup = async (userId: number, studyGroupId: number, headers: Record<string, string>) => {
-  try {
-    const response = await apiClient.post(
-      '/study-groups/join-study-group',
-      { userId, studyGroupId },
-      { headers }
-    );
-    return response.data;
-  } catch (error) {
-    throw new Error('Failed to join study group');
-  }
+const API_BASE_URL = '/api/study-groups'; // Adjust based on your backend setup
+
+export const createStudyGroup = async (name: string, description: string) => {
+  return axios.post(`${API_BASE_URL}`, { name, description });
 };
 
-// Leave a study group
-export const leaveStudyGroup = async (userId: number, studyGroupId: number, headers: Record<string, string>) => {
-  try {
-    const response = await apiClient.post(
-      '/study-groups/leave-study-group',
-      { userId, studyGroupId },
-      { headers }
-    );
-    return response.data;
-  } catch (error) {
-    throw new Error('Failed to leave study group');
-  }
+export const getAllStudyGroups = async () => {
+  return axios.get(`${API_BASE_URL}`);
+};
+
+export const getStudyGroupById = async (id: number) => {
+  return axios.get(`${API_BASE_URL}/${id}`);
+};
+
+export const updateStudyGroup = async (id: number, name: string, description: string) => {
+  return axios.put(`${API_BASE_URL}/${id}`, { name, description });
+};
+
+export const deleteStudyGroup = async (id: number) => {
+  return axios.delete(`${API_BASE_URL}/${id}`);
+};
+
+export const joinStudyGroup = async (studyGroupId: number, userId: number) => {
+  return axios.post(`${API_BASE_URL}/${studyGroupId}/join`, { userId });
+};
+
+export const leaveStudyGroup = async (studyGroupId: number, userId: number) => {
+  return axios.post(`${API_BASE_URL}/${studyGroupId}/leave`, { userId });
+};
+
+export const inviteToStudyGroup = async (studyGroupId: number, userId: number) => {
+  return axios.post(`${API_BASE_URL}/${studyGroupId}/invite`, { userId });
 };

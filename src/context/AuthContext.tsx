@@ -8,7 +8,7 @@ interface AuthContextProps {
   token: string | null;
   loginWithEmail: (email: string, password: string) => Promise<void>;
   signUpWithEmail: (email: string, password: string) => Promise<void>;
-  signInWithPhone: (phone: string, verificationCode: string) => Promise<void>;
+  signInWithPhone: (phone: string, recaptchaContainerId: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   signInWithFacebook: () => Promise<void>;
 }
@@ -21,7 +21,6 @@ const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const auth: Auth = getAuth();
-
   const [userId, setUserId] = React.useState<string | null>(null);
   const [token, setToken] = React.useState<string | null>(null);
 
@@ -47,15 +46,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const handleSignInWithPhone = async (phone: string | null, recaptchaContainerId: string | null) => {
+  const handleSignInWithPhone = async (phone: string, recaptchaContainerId: string) => {
     if (!phone || !recaptchaContainerId) {
       console.error('Phone number or reCAPTCHA container ID is missing');
       return;
     }
-  
+
     try {
       const confirmationResult = await signInWithPhone(phone, recaptchaContainerId);
-      // Prompt user for verification code
       const code = prompt('Enter the verification code sent to your phone');
       if (code) {
         const userCredential = await confirmationResult.confirm(code);
